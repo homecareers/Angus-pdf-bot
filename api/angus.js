@@ -1,18 +1,17 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Only POST allowed' });
+    return res.status(405).json({ error: 'Only POST requests are allowed' });
   }
 
   const { input } = req.body;
 
   // Airtable Config
   const baseId = 'appVA6mdGqaBl846K';
-  const tableId = encodeURIComponent('Legacy Builder Responses'); // ✅ Encode it!
-  const token = 'YOUR_PERSONAL_ACCESS_TOKEN'; // make sure it's still valid
+  const tableId = 'tbla8A3n3oMroTk03'; // ✅ Correct table ID
+  const token = 'patZdfRRhYK736L95.fdd6f6c3698ed0403accd321854ae5c09b9bf838a15c41ef4878e01c3f4a34c6';
 
   try {
-    // Fetch latest matching record
-    const airtableResponse = await fetch(
+    const response = await fetch(
       `https://api.airtable.com/v0/${baseId}/${tableId}?maxRecords=1&sort[0][field]=Timestamp&sort[0][direction]=desc`,
       {
         headers: {
@@ -21,16 +20,15 @@ export default async function handler(req, res) {
       }
     );
 
-    const airtableData = await airtableResponse.json();
+    const data = await response.json();
 
-    if (!airtableData.records || airtableData.records.length === 0) {
-      console.error('🛑 ANGUS Error: No records found');
-      return res.status(404).json({ error: 'No matching records found in Airtable.' });
+    if (!data.records || data.records.length === 0) {
+      throw new Error('No records found');
     }
 
-    const record = airtableData.records[0].fields;
+    const record = data.records[0].fields;
 
-    const mockResponse = `
+    const result = `
 ✅ Business Narrative for: ${record["Name"] || "Unknown Name"}  
 ✅ GEM Style: ${record["GEM Style"] || "Not Specified"}  
 ✅ Primary Goal: ${record["Primary Goal"] || "Unknown"}  
@@ -38,9 +36,10 @@ export default async function handler(req, res) {
 🧠 Input you sent: ${input}
     `;
 
-    return res.status(200).json({ response: mockResponse });
+    return res.status(200).json({ response: result });
+
   } catch (error) {
-    console.error('🔥 ANGUS API Error:', error);
-    return res.status(500).json({ error: 'Something went wrong on the server.' });
+    console.error('ANGUS Error:', error.message);
+    return res.status(500).json({ error: 'ANGUS encountered an issue: ' + error.message });
   }
 }
