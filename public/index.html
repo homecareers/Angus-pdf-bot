@@ -1,0 +1,18 @@
+<script>
+  async function submitInput() {
+    const input = document.getElementById('inputBox').value;
+
+    const response = await fetch('/api/angus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input }),
+    });
+
+    const data = await response.json();
+
+    document.getElementById('outputArea').innerHTML = `
+      <h2>ANGUS™ Response:</h2>
+      <pre>${data.response}</pre>
+    `;
+  }
+</script>
