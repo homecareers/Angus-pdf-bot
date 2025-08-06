@@ -1,18 +1,37 @@
-<script>
-  async function submitInput() {
-    const input = document.getElementById('inputBox').value;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANGUS™ PDF Bot</title>
+</head>
+<body style="font-family: sans-serif; padding: 40px;">
+  <h1>ANGUS™Bot Manual Mode</h1>
+  <p>Type in a request, and ANGUS will generate your Business + Wellness overview.</p>
 
-    const response = await fetch('/api/angus', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input }),
-    });
+  <textarea id="inputBox" rows="6" cols="80" placeholder="Example: Give me the consult script and wellness summary for Legacy-X25-OP1046"></textarea>
+  <br /><br />
+  <button onclick="submitInput()">Ask ANGUS™</button>
 
-    const data = await response.json();
+  <div id="outputArea" style="margin-top: 30px;"></div>
 
-    document.getElementById('outputArea').innerHTML = `
-      <h2>ANGUS™ Response:</h2>
-      <pre>${data.response}</pre>
-    `;
-  }
-</script>
+  <script>
+    async function submitInput() {
+      const input = document.getElementById('inputBox').value;
+
+      const response = await fetch('/api/angus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input }),
+      });
+
+      const data = await response.json();
+
+      document.getElementById('outputArea').innerHTML = `
+        <h2>ANGUS™ Response:</h2>
+        <pre>${data.response}</pre>
+      `;
+    }
+  </script>
+</body>
+</html>
