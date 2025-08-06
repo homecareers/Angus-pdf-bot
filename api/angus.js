@@ -1,40 +1,46 @@
 export default async function handler(req, res) {
-  console.log("⚙️ Request received", req.body);
-
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Only POST allowed' });
   }
 
   const { input } = req.body;
-  console.log("📥 Input:", input);
 
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  const tableName = encodeURIComponent(process.env.AIRTABLE_TABLE_NAME);
-  const token = process.env.AIRTABLE_TOKEN;
-  console.log("🔐 Config:", { baseId, tableName });
-
-  const url = `https://api.airtable.com/v0/${baseId}/${tableName}?maxRecords=1&sort[0][field]=Timestamp&sort[0][direction]=desc`;
-  console.log("🔗 Airtable URL:", url);
+  // Airtable Config
+  const baseId = 'appVA6mdGqaBl846K';
+  const tableId = encodeURIComponent('Legacy Builder Responses'); // ✅ Encode it!
+  const token = 'YOUR_PERSONAL_ACCESS_TOKEN'; // make sure it's still valid
 
   try {
-    const airtableResp = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    // Fetch latest matching record
+    const airtableResponse = await fetch(
+      `https://api.airtable.com/v0/${baseId}/${tableId}?maxRecords=1&sort[0][field]=Timestamp&sort[0][direction]=desc`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-    const airtableJson = await airtableResp.json();
-    console.log("📦 Airtable Response:", airtableJson);
+    const airtableData = await airtableResponse.json();
 
-    const fields = airtableJson.records?.[0]?.fields;
-    if (!fields) {
-      throw new Error("No records found");
+    if (!airtableData.records || airtableData.records.length === 0) {
+      console.error('🛑 ANGUS Error: No records found');
+      return res.status(404).json({ error: 'No matching records found in Airtable.' });
     }
 
-    const gptPrompt = `Legacy record: ${JSON.stringify(fields)}\n\nRequest:\n${input}`;
-    console.log("🧠 GPT Prompt:", gptPrompt);
+    const record = airtableData.records[0].fields;
 
-    return res.status(200).json({ response: "OK (backend logs visible)" });
-  } catch (err) {
-    console.error("🔴 ANGUS Error:", err);
-    return res.status(500).json({ error: err.message });
+    const mockResponse = `
+✅ Business Narrative for: ${record["Name"] || "Unknown Name"}  
+✅ GEM Style: ${record["GEM Style"] || "Not Specified"}  
+✅ Primary Goal: ${record["Primary Goal"] || "Unknown"}  
+
+🧠 Input you sent: ${input}
+    `;
+
+    return res.status(200).json({ response: mockResponse });
+  } catch (error) {
+    console.error('🔥 ANGUS API Error:', error);
+    return res.status(500).json({ error: 'Something went wrong on the server.' });
   }
 }
