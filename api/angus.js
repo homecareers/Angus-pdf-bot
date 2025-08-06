@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   // Airtable Config
   const baseId = 'appVA6mdGqaBl846K';
-  const tableId = 'Legacy%20Builder%20Responses';
+  const tableId = encodeURIComponent('Legacy Builder Responses');
   const token = 'patZdfRRhYK736L95.fdd6f6c3698ed0403accd321854ae5c09b9bf838a15c41ef4878e01c3f4a34c6';
 
   // Fetch latest matching record
